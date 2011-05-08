@@ -4,9 +4,21 @@
 //
 //	Database class for PHP 5
 //
-//	Requires: mysql module
+//	Requires: mysql
 //
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class phpDB {
 	private $dblink = NULL;
@@ -63,7 +75,26 @@ class phpDB {
 	
 	public function update($table, $data) {
 		$query = "UPDATE `$table` SET (";
-		
+		while(list($columns, ) = each($data)) {
+			$query .= $columns . ", ";
+		}
+		$query = substr($query, 0, -2) . ") VALUES (";
+		reset($data);
+		while (list(, $value) = each($data)) {
+			switch ((string)$value) {
+				case "now()":
+					$query .= "now(), ";
+					break;
+				case "null":
+					$query .= "null, ";
+					break;
+				default:
+					$query .= "'$value', ";
+					break;
+			}
+		}
+		$query = substr($query, 0, -2) .");";
+		return $this->query($query);		
 	}
 	
 	public function num_rows($result) {
